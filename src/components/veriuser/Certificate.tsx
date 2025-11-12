@@ -116,9 +116,7 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft
                   style={{
                     color: daysLeft > 7 ? '#2E7D32' : '#EF6C00',
                   }}
-                >
-                  Действителен ещё {daysLeft} дней
-                </p>
+                >Действителен 30 дней</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mb-6">
