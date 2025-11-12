@@ -28,11 +28,22 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft
 
     try {
       const element = certificateRef.current;
-      const canvas = await html2canvas(element, {
+      
+      // Клонируем элемент для генерации PDF без изменения оригинала
+      const clonedElement = element.cloneNode(true) as HTMLElement;
+      clonedElement.style.position = 'absolute';
+      clonedElement.style.left = '-9999px';
+      document.body.appendChild(clonedElement);
+
+      const canvas = await html2canvas(clonedElement, {
         scale: 2,
         backgroundColor: '#f8fafc',
         logging: false,
+        useCORS: true,
       });
+
+      // Удаляем клонированный элемент
+      document.body.removeChild(clonedElement);
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({
