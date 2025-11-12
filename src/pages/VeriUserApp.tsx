@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
 import { useToast } from '@/hooks/use-toast';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface Patent {
   id: string;
@@ -188,6 +190,43 @@ const VeriUserApp = () => {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!certificateRef.current || !certificateUser) return;
+
+    try {
+      const element = certificateRef.current;
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        backgroundColor: null,
+        logging: false,
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save(`certificate_${certificateUser.username}_${certificateUser.id}.pdf`);
+
+      toast({
+        title: 'Успешно',
+        description: 'Сертификат скачан в PDF',
+      });
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось создать PDF',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleAddStatus = () => {
@@ -651,14 +690,12 @@ const VeriUserApp = () => {
                       </div>
                     </div>
                     <Badge
-                      className="px-4 py-2"
+                      className="px-4 py-2 text-white font-medium"
                       style={{
-                        backgroundColor: getDaysLeft(certificateUser.createdAt) > 0 ? 'rgba(255,255,255,0.2)' : 'rgba(255,152,0,0.3)',
-                        color: 'white',
-                        backdropFilter: 'blur(10px)',
+                        backgroundColor: getStatusColor(certificateUser.status),
                       }}
                     >
-                      {getDaysLeft(certificateUser.createdAt) > 0 ? 'Верификация не пройдена' : 'Требуется проверка'}
+                      {certificateUser.status}
                     </Badge>
                   </div>
 
@@ -667,13 +704,15 @@ const VeriUserApp = () => {
                     <p className="text-2xl text-blue-100">@{certificateUser.username}</p>
                   </div>
 
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6">
-                    <div className="text-center mb-4">
-                      <p className="text-sm text-blue-100 mb-1">СРОК ДЕЙСТВИЯ</p>
-                      <p className="text-lg font-semibold">
-                        Действителен ещё {getDaysLeft(certificateUser.createdAt)} дней
-                      </p>
-                    </div>
+                  <div 
+                    className="rounded-xl p-6 mb-6 text-center"
+                    style={{
+                      backgroundColor: getStatusColor(certificateUser.status),
+                    }}
+                  >
+                    <p className="text-lg font-semibold text-white">
+                      Действителен ещё {getDaysLeft(certificateUser.createdAt)} дней
+                    </p>
                   </div>
 
                   <div className="grid grid-cols-2 gap-6 mb-6">
@@ -733,10 +772,16 @@ const VeriUserApp = () => {
                   </div>
                 </div>
               </div>
-              <Button onClick={handlePrint} className="w-full">
-                <Icon name="Printer" className="mr-2" size={18} />
-                Печать / Скачать
-              </Button>
+              <div className="flex gap-3">
+                <Button onClick={handleDownloadPDF} className="flex-1">
+                  <Icon name="Download" className="mr-2" size={18} />
+                  Скачать PDF
+                </Button>
+                <Button onClick={handlePrint} variant="outline" className="flex-1">
+                  <Icon name="Printer" className="mr-2" size={18} />
+                  Печать
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
