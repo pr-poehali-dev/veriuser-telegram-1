@@ -105,6 +105,10 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft
                   {user.status}
                 </Badge>
               </div>
+              <div className="text-center">
+                <p className="text-blue-100 text-xs mb-1">ID СЕРТИФИКАТА</p>
+                <p className="text-white font-mono text-sm font-semibold">#{user.id}</p>
+              </div>
             </div>
 
             <div className="bg-white px-8 py-6">
