@@ -23,13 +23,12 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft
     window.print();
   };
 
-  const handleDownloadPDF = async () => {
+  const handleDownloadImage = async () => {
     if (!certificateRef.current || !user) return;
 
     try {
       const element = certificateRef.current;
       
-      // Клонируем элемент для генерации PDF без изменения оригинала
       const clonedElement = element.cloneNode(true) as HTMLElement;
       clonedElement.style.position = 'absolute';
       clonedElement.style.left = '-9999px';
@@ -42,7 +41,50 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft
         useCORS: true,
       });
 
-      // Удаляем клонированный элемент
+      document.body.removeChild(clonedElement);
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `certificate_${user.username}_${user.id}.png`;
+          link.click();
+          URL.revokeObjectURL(url);
+
+          onToast({
+            title: 'Успешно',
+            description: 'Изображение сертификата скачано',
+          });
+        }
+      }, 'image/png');
+    } catch (error) {
+      onToast({
+        title: 'Ошибка',
+        description: 'Не удалось создать изображение',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!certificateRef.current || !user) return;
+
+    try {
+      const element = certificateRef.current;
+      
+      const clonedElement = element.cloneNode(true) as HTMLElement;
+      clonedElement.style.position = 'absolute';
+      clonedElement.style.left = '-9999px';
+      document.body.appendChild(clonedElement);
+
+      const canvas = await html2canvas(clonedElement, {
+        scale: 2,
+        backgroundColor: '#f8fafc',
+        logging: false,
+        useCORS: true,
+      });
+
       document.body.removeChild(clonedElement);
 
       const imgData = canvas.toDataURL('image/png');
@@ -187,12 +229,16 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft
               </div>
             </div>
           </div>
-          <div className="flex gap-3">
-            <Button onClick={handleDownloadPDF} className="flex-1">
-              <Icon name="Download" className="mr-2" size={18} />
-              Скачать PDF
+          <div className="grid grid-cols-3 gap-3">
+            <Button onClick={handleDownloadImage} variant="default">
+              <Icon name="Image" className="mr-2" size={18} />
+              Картинка
             </Button>
-            <Button onClick={handlePrint} variant="outline" className="flex-1">
+            <Button onClick={handleDownloadPDF} variant="default">
+              <Icon name="FileDown" className="mr-2" size={18} />
+              PDF
+            </Button>
+            <Button onClick={handlePrint} variant="outline">
               <Icon name="Printer" className="mr-2" size={18} />
               Печать
             </Button>
