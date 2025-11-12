@@ -102,17 +102,7 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft
                 <p className="text-xl text-blue-600">@{user.username}</p>
               </div>
 
-              {user.reason && (
-                <div 
-                  className="rounded-xl p-4 mb-6 text-center"
-                  style={{
-                    backgroundColor: getStatusColor(user.status),
-                  }}
-                >
-                  <p className="text-xs text-white/90 mb-1">ВЕРИФИКАЦИЯ</p>
-                  <p className="text-base font-semibold text-white">{user.reason}</p>
-                </div>
-              )}
+
 
               <div 
                 className="rounded-xl p-4 mb-6 text-center"
