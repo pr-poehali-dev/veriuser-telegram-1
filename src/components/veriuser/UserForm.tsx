@@ -26,6 +26,7 @@ const UserForm = ({ editingUser, statuses, categories, onSubmit, onCancel }: Use
     status: '',
     statusNote: '',
     otherSocialNetworks: '',
+    photoUrl: '',
   });
 
   const [patents, setPatents] = useState<Patent[]>([{ id: '1', text: '' }]);
@@ -41,6 +42,7 @@ const UserForm = ({ editingUser, statuses, categories, onSubmit, onCancel }: Use
         status: editingUser.status,
         statusNote: editingUser.statusNote,
         otherSocialNetworks: editingUser.otherSocialNetworks,
+        photoUrl: editingUser.photoUrl || '',
       });
       setPatents(editingUser.patents.length > 0 ? editingUser.patents : [{ id: '1', text: '' }]);
     } else {
@@ -53,6 +55,7 @@ const UserForm = ({ editingUser, statuses, categories, onSubmit, onCancel }: Use
         status: '',
         statusNote: '',
         otherSocialNetworks: '',
+        photoUrl: '',
       });
       setPatents([{ id: '1', text: '' }]);
     }
@@ -131,6 +134,16 @@ const UserForm = ({ editingUser, statuses, categories, onSubmit, onCancel }: Use
                 placeholder="25 лет"
               />
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="photoUrl">URL фотографии</Label>
+            <Input
+              id="photoUrl"
+              value={formData.photoUrl}
+              onChange={(e) => setFormData({ ...formData, photoUrl: e.target.value })}
+              placeholder="https://example.com/photo.jpg"
+            />
           </div>
 
           <div className="space-y-2">

@@ -113,6 +113,15 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft
 
             <div className="bg-white px-8 py-6">
               <div className="text-center mb-6 pb-6 border-b">
+                {user.photoUrl && (
+                  <div className="flex justify-center mb-4">
+                    <img 
+                      src={user.photoUrl} 
+                      alt={user.owner}
+                      className="w-24 h-24 rounded-full object-cover border-4 border-blue-100"
+                    />
+                  </div>
+                )}
                 <h1 className="text-3xl font-bold text-gray-900 mb-1">{user.owner}</h1>
                 <p className="text-xl text-blue-600">@{user.username}</p>
               </div>
