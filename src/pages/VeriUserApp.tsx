@@ -274,6 +274,7 @@ const VeriUserApp = () => {
         onClose={() => setCertificateUser(null)}
         getStatusColor={getStatusColor}
         getExpiryDate={getExpiryDate}
+        getDaysLeft={getDaysLeft}
         onToast={toast}
       />
 

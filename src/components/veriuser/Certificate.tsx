@@ -12,10 +12,11 @@ interface CertificateProps {
   onClose: () => void;
   getStatusColor: (statusName: string) => string;
   getExpiryDate: (createdAt: string) => string;
+  getDaysLeft: (createdAt: string) => number;
   onToast: (config: { title: string; description: string; variant?: 'destructive' }) => void;
 }
 
-const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, onToast }: CertificateProps) => {
+const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft, onToast }: CertificateProps) => {
   const certificateRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = () => {
@@ -29,7 +30,7 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, onToast }: 
       const element = certificateRef.current;
       const canvas = await html2canvas(element, {
         scale: 2,
-        backgroundColor: null,
+        backgroundColor: '#f8fafc',
         logging: false,
       });
 
@@ -61,6 +62,8 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, onToast }: 
 
   if (!user) return null;
 
+  const daysLeft = getDaysLeft(user.createdAt);
+
   return (
     <Dialog open={!!user} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-auto">
@@ -68,87 +71,116 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, onToast }: 
           <DialogTitle>Сертификат верификации</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          <div ref={certificateRef} className="certificate-container">
-            <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-8 text-white shadow-2xl">
-              <div className="flex items-center justify-between mb-8">
+          <div ref={certificateRef} className="certificate-container bg-gray-50 p-6 rounded-xl">
+            <div className="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-t-2xl p-6 text-white">
+              <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center">
-                    <span className="text-blue-600 font-bold text-2xl">V</span>
+                  <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center">
+                    <span className="text-blue-600 font-bold text-xl">V</span>
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold">VeriUserRU</h2>
-                    <p className="text-blue-100 text-sm">Сертификат верификации</p>
+                    <h2 className="text-xl font-bold">VeriUserRU</h2>
+                    <p className="text-blue-100 text-xs">Сертификат верификации</p>
                   </div>
                 </div>
                 <Badge
-                  className="px-4 py-2 text-white font-medium"
+                  className="px-3 py-1.5 text-sm font-medium flex items-center gap-1.5"
+                  style={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                    color: 'white',
+                  }}
+                >
+                  <Icon name="AlertCircle" size={14} />
+                  {user.status}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="bg-white px-8 py-6">
+              <div className="text-center mb-6 pb-6 border-b">
+                <h1 className="text-3xl font-bold text-gray-900 mb-1">{user.owner}</h1>
+                <p className="text-xl text-blue-600">@{user.username}</p>
+              </div>
+
+              {user.reason && (
+                <div 
+                  className="rounded-xl p-4 mb-6 text-center"
                   style={{
                     backgroundColor: getStatusColor(user.status),
                   }}
                 >
-                  {user.status}
-                </Badge>
-              </div>
-
-              <div className="text-center mb-8">
-                <h1 className="text-4xl font-bold mb-2">{user.owner}</h1>
-                <p className="text-2xl text-blue-100">@{user.username}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6 mb-6">
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                  <p className="text-xs text-blue-100 mb-1">КАНАЛ / ПРОФИЛЬ</p>
-                  <p className="font-semibold">{user.channelOrProfile || 'Не указано'}</p>
+                  <p className="text-xs text-white/90 mb-1">ВЕРИФИКАЦИЯ</p>
+                  <p className="text-base font-semibold text-white">{user.reason}</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                  <p className="text-xs text-blue-100 mb-1">ВОЗРАСТ</p>
-                  <p className="font-semibold">{user.age || 'Не указано'}</p>
+              )}
+
+              <div 
+                className="rounded-xl p-4 mb-6 text-center"
+                style={{
+                  backgroundColor: daysLeft > 7 ? '#E8F5E9' : '#FFF3E0',
+                }}
+              >
+                <p className="text-xs text-gray-600 mb-1">СРОК ДЕЙСТВИЯ</p>
+                <p 
+                  className="text-base font-semibold"
+                  style={{
+                    color: daysLeft > 7 ? '#2E7D32' : '#EF6C00',
+                  }}
+                >
+                  Действителен ещё {daysLeft} дней
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                <div className="border rounded-lg p-3 bg-gray-50">
+                  <p className="text-xs text-gray-500 mb-1">КАНАЛ / ПРОФИЛЬ</p>
+                  <p className="text-sm font-medium text-gray-900">{user.channelOrProfile || 'Не указано'}</p>
+                </div>
+                <div className="border rounded-lg p-3 bg-gray-50">
+                  <p className="text-xs text-gray-500 mb-1">ВОЗРАСТ</p>
+                  <p className="text-sm font-medium text-gray-900">{user.age || 'Не указано'}</p>
                 </div>
               </div>
 
               {user.otherSocialNetworks && (
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-6">
-                  <p className="text-xs text-blue-100 mb-2">ДРУГИЕ СОЦИАЛЬНЫЕ СЕТИ</p>
-                  <p className="text-sm">{user.otherSocialNetworks}</p>
+                <div className="border rounded-lg p-3 bg-gray-50 mb-6">
+                  <p className="text-xs text-gray-500 mb-1">ДРУГИЕ СОЦИАЛЬНЫЕ СЕТИ</p>
+                  <p className="text-sm text-gray-900">{user.otherSocialNetworks}</p>
                 </div>
               )}
 
               {user.patents.length > 0 && (
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-6">
-                  <p className="text-xs text-blue-100 mb-3">
-                    <Icon name="Shield" className="inline mr-2" size={14} />
+                <div className="border rounded-lg p-4 bg-blue-50 mb-6">
+                  <p className="text-xs text-gray-700 mb-3 flex items-center gap-2">
+                    <Icon name="Lock" size={14} />
                     Подтверждённые права собственности
                   </p>
                   <div className="space-y-2">
                     {user.patents.map((patent, index) => (
-                      <div key={patent.id} className="flex items-start gap-2 text-sm">
-                        <span className="text-blue-200">#{index + 1}</span>
+                      <div key={patent.id} className="flex items-start gap-2 text-sm text-gray-800">
+                        <span className="text-blue-600 font-medium">#{index + 1}</span>
                         <span>{patent.text}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
+            </div>
 
-              <div className="bg-blue-600/50 backdrop-blur-sm rounded-xl p-4 text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <Icon name="CheckCircle" size={20} />
-                  <span className="font-semibold">Подтверждено командой: VeriUserRU</span>
-                </div>
-                <div className="flex justify-center gap-8 text-sm">
-                  <div>
-                    <p className="text-blue-100">Дата выдачи</p>
-                    <p className="font-semibold">{new Date(user.createdAt).toLocaleDateString('ru-RU')}</p>
-                  </div>
-                  <div>
-                    <p className="text-blue-100">Действителен до</p>
-                    <p className="font-semibold">{getExpiryDate(user.createdAt)}</p>
-                  </div>
-                </div>
+            <div className="bg-blue-600 rounded-b-2xl p-5 text-white text-center">
+              <div className="flex items-center justify-center gap-2 mb-3">
+                <Icon name="CheckCircle" size={18} />
+                <span className="font-semibold text-sm">Подтверждено командой VeriUserRU</span>
               </div>
-
-              <div className="mt-6 text-center text-xs text-blue-100">
-                ID сертификата: {user.id}
+              <div className="flex justify-center gap-8 text-xs">
+                <div className="bg-white/20 rounded-lg px-4 py-2">
+                  <p className="text-blue-100 mb-0.5">Дата выдачи</p>
+                  <p className="font-semibold">{new Date(user.createdAt).toLocaleDateString('ru-RU')}</p>
+                </div>
+                <div className="bg-white/20 rounded-lg px-4 py-2">
+                  <p className="text-blue-100 mb-0.5">Действителен до</p>
+                  <p className="font-semibold">{getExpiryDate(user.createdAt)}</p>
+                </div>
               </div>
             </div>
           </div>
