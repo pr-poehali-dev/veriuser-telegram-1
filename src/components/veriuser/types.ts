@@ -15,7 +15,6 @@ export interface User {
   statusNote: string;
   otherSocialNetworks: string;
   createdAt: string;
-  photoUrl?: string;
 }
 
 export interface Status {
