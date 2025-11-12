@@ -40,6 +40,8 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft
         backgroundColor: '#f8fafc',
         logging: false,
         useCORS: true,
+        windowWidth: clonedElement.scrollWidth,
+        windowHeight: clonedElement.scrollHeight,
       });
 
       document.body.removeChild(clonedElement);
@@ -76,6 +78,8 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft
         backgroundColor: '#f8fafc',
         logging: false,
         useCORS: true,
+        windowWidth: clonedElement.scrollWidth,
+        windowHeight: clonedElement.scrollHeight,
       });
 
       document.body.removeChild(clonedElement);
@@ -120,6 +124,8 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft
         backgroundColor: '#f8fafc',
         logging: false,
         useCORS: true,
+        windowWidth: clonedElement.scrollWidth,
+        windowHeight: clonedElement.scrollHeight,
       });
 
       document.body.removeChild(clonedElement);
