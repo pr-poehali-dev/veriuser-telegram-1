@@ -60,18 +60,6 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft
     }
   };
 
-  const handleCopyLink = () => {
-    if (!user) return;
-    
-    const certificateUrl = `${window.location.origin}?certificate=${user.id}`;
-    navigator.clipboard.writeText(certificateUrl);
-    
-    onToast({
-      title: 'Успешно',
-      description: 'Ссылка скопирована в буфер обмена',
-    });
-  };
-
   if (!user) return null;
 
   const daysLeft = getDaysLeft(user.createdAt);
@@ -184,20 +172,14 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft
               </div>
             </div>
           </div>
-          <div className="space-y-3">
-            <div className="flex gap-3">
-              <Button onClick={handleDownloadPDF} className="flex-1">
-                <Icon name="Download" className="mr-2" size={18} />
-                Скачать PDF
-              </Button>
-              <Button onClick={handlePrint} variant="outline" className="flex-1">
-                <Icon name="Printer" className="mr-2" size={18} />
-                Печать
-              </Button>
-            </div>
-            <Button onClick={handleCopyLink} variant="secondary" className="w-full">
-              <Icon name="Link" className="mr-2" size={18} />
-              Скопировать ссылку на сертификат
+          <div className="flex gap-3">
+            <Button onClick={handleDownloadPDF} className="flex-1">
+              <Icon name="Download" className="mr-2" size={18} />
+              Скачать PDF
+            </Button>
+            <Button onClick={handlePrint} variant="outline" className="flex-1">
+              <Icon name="Printer" className="mr-2" size={18} />
+              Печать
             </Button>
           </div>
         </div>
