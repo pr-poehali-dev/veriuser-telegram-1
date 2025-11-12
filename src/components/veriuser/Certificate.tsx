@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -18,9 +18,46 @@ interface CertificateProps {
 
 const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft, onToast }: CertificateProps) => {
   const certificateRef = useRef<HTMLDivElement>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handlePreview = async () => {
+    if (!certificateRef.current || !user) return;
+
+    try {
+      const element = certificateRef.current;
+      
+      const clonedElement = element.cloneNode(true) as HTMLElement;
+      clonedElement.style.position = 'absolute';
+      clonedElement.style.left = '-9999px';
+      document.body.appendChild(clonedElement);
+
+      const canvas = await html2canvas(clonedElement, {
+        scale: 2,
+        backgroundColor: '#f8fafc',
+        logging: false,
+        useCORS: true,
+      });
+
+      document.body.removeChild(clonedElement);
+
+      const imageUrl = canvas.toDataURL('image/png');
+      setPreviewImage(imageUrl);
+
+      onToast({
+        title: 'Готово',
+        description: 'Превью сертификата создано',
+      });
+    } catch (error) {
+      onToast({
+        title: 'Ошибка',
+        description: 'Не удалось создать превью',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleDownloadImage = async () => {
@@ -243,6 +280,45 @@ const Certificate = ({ user, onClose, getStatusColor, getExpiryDate, getDaysLeft
               Печать
             </Button>
           </div>
+
+          <Button onClick={handlePreview} variant="secondary" className="w-full">
+            <Icon name="Eye" className="mr-2" size={18} />
+            Показать превью картинки
+          </Button>
+
+          {previewImage && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-gray-700">Превью картинки</p>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setPreviewImage(null)}
+                >
+                  <Icon name="X" size={16} />
+                </Button>
+              </div>
+              <div className="border rounded-lg overflow-hidden bg-gray-50">
+                <img 
+                  src={previewImage} 
+                  alt="Certificate Preview" 
+                  className="w-full h-auto"
+                />
+              </div>
+              <Button
+                onClick={() => {
+                  const link = document.createElement('a');
+                  link.href = previewImage;
+                  link.download = `certificate_${user?.username}_${user?.id}.png`;
+                  link.click();
+                }}
+                className="w-full"
+              >
+                <Icon name="Download" className="mr-2" size={18} />
+                Скачать это изображение
+              </Button>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
